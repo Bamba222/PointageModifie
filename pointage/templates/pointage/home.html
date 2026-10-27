@@ -1,0 +1,37 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-4">
+  <div>
+    <div class="text-muted">{{ today|date:"l j F Y" }}</div>
+    <h1 class="h2 fw-bold mb-0">Bonjour {{ user.first_name|default:user.username }} 👋</h1>
+  </div>
+  <a class="btn btn-brand" href="{% url 'pointage:chantier_create' %}">+ Nouveau chantier</a>
+</div>
+<div class="row g-3">
+  {% for k in cartes %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card-soft chantier-card h-100">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><h2 class="h5 fw-bold mb-0">{{ k.c.nom }}</h2><div class="text-muted small">{{ k.c.site|default:"—" }}{% if k.c.client %} · {{ k.c.client }}{% endif %}</div></div>
+        <span class="pill {% if k.c.actif %}pill-ok{% else %}pill-grey{% endif %}">{{ k.c.code }}</span>
+      </div>
+      <div class="row text-center g-2 my-3">
+        <div class="col-4"><div class="fs-4 fw-bold">{{ k.presents }}<small class="fs-6 text-muted">/{{ k.equipe }}</small></div><div class="small text-muted">présents</div></div>
+        <div class="col-4"><div class="fs-4 fw-bold">{{ k.demandes }}</div><div class="small text-muted">demandes{% if k.urgentes %} <span class="pill pill-danger">{{ k.urgentes }} urgente{{ k.urgentes|pluralize }}</span>{% endif %}</div></div>
+        <div class="col-4"><div class="fs-4 fw-bold">{{ k.a_livrer }}</div><div class="small text-muted">à livrer</div></div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-brand btn-sm" href="{% url 'pointage:pointage_semaine' k.c.pk %}">Pointer</a>
+        <a class="btn btn-outline-brand btn-sm" href="{% url 'pointage:demande_create' k.c.pk %}">+ Demande</a>
+        <a class="btn btn-outline-secondary btn-sm ms-auto" href="{{ k.c.get_absolute_url }}">Ouvrir →</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="card-soft p-5 text-center">
+    <div class="fs-1">🏗️</div><h2 class="h5">Aucun chantier pour le moment</h2>
+    <p class="text-muted">Crée ton premier chantier (nom, code comme YML, site, chef de projet).</p>
+    <a class="btn btn-brand" href="{% url 'pointage:chantier_create' %}">+ Nouveau chantier</a></div></div>
+  {% endfor %}
+</div>
+{% endblock %}

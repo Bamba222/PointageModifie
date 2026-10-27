@@ -1,0 +1,20 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<h2 class="h5 fw-bold mb-3">Livraison — {{ b.numero }} ({{ b.fournisseur }})</h2>
+<form method="post" class="card-soft p-4" style="max-width:820px">
+  {% csrf_token %}{{ form.non_field_errors }}
+  <div class="row g-3 mb-3">
+    <div class="col-md-4"><label class="form-label small fw-semibold mb-1">{{ form.date.label }}</label>{{ form.date }}{% for e in form.date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+    <div class="col-md-4"><label class="form-label small fw-semibold mb-1">{{ form.bon_livraison.label }}</label>{{ form.bon_livraison }}</div>
+    <div class="col-md-4"><label class="form-label small fw-semibold mb-1">{{ form.notes.label }}</label>{{ form.notes }}</div>
+  </div>
+  <table class="table table-sm grid">
+    <thead><tr><th>Désignation</th><th class="num">Commandé</th><th class="num">Déjà reçu</th><th class="num">Reste</th><th style="width:160px">Reçu aujourd'hui</th></tr></thead>
+    {% for l, champ in form.cellules %}<tr><td>{{ l.designation }}</td><td class="num">{{ l.quantite|floatformat:"-3" }} {{ l.unite }}</td>
+      <td class="num">{{ l.recu|floatformat:"-3" }}</td><td class="num">{{ l.reste|floatformat:"-3" }}</td>
+      <td>{{ champ }}{% for e in champ.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td></tr>{% endfor %}
+  </table>
+  <div class="d-flex gap-2"><button class="btn btn-success">Enregistrer la livraison</button>
+    <a class="btn btn-outline-secondary" href="{{ b.get_absolute_url }}">Annuler</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<h2 class="h5 fw-bold mb-3">{{ title }}</h2>
+{% include "pointage/_datalists.html" %}
+<form method="post">
+  {% csrf_token %}{{ form.non_field_errors }}
+  <div class="card-soft p-3 mb-3"><div class="row g-3">
+    {% for f in form %}<div class="col-md-{% if f.name == 'notes' %}12{% else %}3{% endif %}">
+      <label class="form-label small fw-semibold mb-1">{{ f.label }}</label>{{ f }}
+      {% if f.help_text %}<div class="form-text">{{ f.help_text }}</div>{% endif %}
+      {% for e in f.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>{% endfor %}
+  </div></div>
+  {{ formset.management_form }}{{ formset.non_form_errors }}
+  <div class="card-soft p-2 mb-3"><table class="table table-sm grid mb-0">
+    <thead><tr><th style="width:40px">N°</th><th>Désignation</th><th style="width:120px">Quantité</th><th style="width:140px">Unité</th>
+      <th style="width:180px">Prix unitaire (F CFA)</th><th>Suppr.</th></tr></thead>
+    {% for fm in formset %}<tr>{% for h in fm.hidden_fields %}{{ h }}{% endfor %}
+      <td class="text-center text-muted">{{ forloop.counter }}</td>
+      <td>{{ fm.designation }}{% for e in fm.designation.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td>
+      <td>{{ fm.quantite }}{% for e in fm.quantite.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td>
+      <td>{{ fm.unite }}</td><td>{{ fm.prix_unitaire }}</td>
+      <td class="text-center">{% if fm.instance.pk %}{{ fm.DELETE }}{% endif %}</td></tr>{% endfor %}
+  </table></div>
+  <button class="btn btn-brand">Enregistrer</button>
+  <a class="btn btn-outline-secondary" href="{% if bon %}{{ bon.get_absolute_url }}{% else %}{% url 'pointage:bon_list' ch.pk %}{% endif %}">Annuler</a>
+</form>
+{% endblock %}

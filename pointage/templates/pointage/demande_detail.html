@@ -1,0 +1,22 @@
+{% extends "pointage/base.html" %}
+{% load pointage_tags %}
+{% block content %}
+{% include "pointage/_demande_tabs.html" with achat=False %}
+{% doc 'appro' as meta %}
+<div class="paper">
+  {% include "pointage/_doc_head.html" %}
+  <table class="doc-info">
+    <tr><td class="lib">N° de la Demande</td><td><strong>{{ d.numero }}</strong></td><td class="lib">Date</td><td>{{ d.date|date:"d/m/Y" }}</td></tr>
+    <tr><td class="lib">Demandeur</td><td colspan="3">{{ d.demandeur }}</td></tr>
+    <tr><td class="lib">Fonction</td><td colspan="3">{{ d.fonction }}</td></tr>
+    <tr><td class="lib">Site</td><td colspan="3">{{ d.site }}</td></tr>
+  </table>
+  <div class="urgence mb-2">URGENCE &nbsp;<span class="check">{% if d.urgence %}✓{% endif %}</span> OUI</div>
+  <table class="doc-table">
+    <thead><tr><th style="width:50px">N°</th><th>Désignation</th><th style="width:110px">Quantité</th><th style="width:100px">Unité</th><th>Spécification technique</th></tr></thead>
+    {% for l in d.lignes.all %}<tr><td class="text-center">{{ forloop.counter }}</td><td>{{ l.designation }}</td>
+      <td class="text-center">{{ l.quantite|floatformat:"-3" }}</td><td class="text-center">{{ l.unite }}</td><td>{{ l.specification }}</td></tr>{% endfor %}
+  </table>
+  {% if d.commentaire %}<p class="mt-3"><strong>Commentaire :</strong> {{ d.commentaire }}</p>{% endif %}
+</div>
+{% endblock %}

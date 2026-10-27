@@ -1,0 +1,3 @@
+{% load pointage_tags %}
+<datalist id="dl-designations">{% for s in suggestions %}<option value="{{ s }}">{% endfor %}</datalist>
+<datalist id="dl-unites">{% unites as lst %}{% for u in lst %}<option value="{{ u }}">{% endfor %}</datalist>

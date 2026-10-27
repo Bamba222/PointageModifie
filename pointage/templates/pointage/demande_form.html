@@ -1,0 +1,29 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<h2 class="h5 fw-bold mb-3">{{ title }}</h2>
+{% include "pointage/_datalists.html" %}
+<form method="post">
+  {% csrf_token %}{{ form.non_field_errors }}
+  <div class="card-soft p-3 mb-3"><div class="row g-3">
+    {% for f in form %}<div class="col-md-{% if f.name == 'commentaire' %}12{% elif f.name == 'urgence' %}2{% else %}3{% endif %}">
+      {% if f.field.widget.input_type == "checkbox" %}<div class="form-check mt-4">{{ f }} <label class="form-check-label fw-bold text-danger" for="{{ f.id_for_label }}">URGENCE</label></div>
+      {% else %}<label class="form-label small fw-semibold mb-1">{{ f.label }}</label>{{ f }}{% endif %}
+      {% if f.help_text %}<div class="form-text">{{ f.help_text }}</div>{% endif %}
+      {% for e in f.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>{% endfor %}
+  </div></div>
+  {{ formset.management_form }}{{ formset.non_form_errors }}
+  <div class="card-soft p-2 mb-3"><table class="table table-sm grid mb-0">
+    <thead><tr><th style="width:40px">N°</th><th>Désignation</th><th style="width:110px">Quantité</th><th style="width:130px">Unité</th>
+      <th>Spécification technique</th><th style="width:210px">Fournisseur recommandé</th><th>Suppr.</th></tr></thead>
+    {% for fm in formset %}<tr>{% for h in fm.hidden_fields %}{{ h }}{% endfor %}
+      <td class="text-center text-muted">{{ forloop.counter }}</td>
+      <td>{{ fm.designation }}{% for e in fm.designation.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td>
+      <td>{{ fm.quantite }}{% for e in fm.quantite.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td>
+      <td>{{ fm.unite }}</td><td>{{ fm.specification }}</td><td>{{ fm.fournisseur_recommande }}</td>
+      <td class="text-center">{% if fm.instance.pk %}{{ fm.DELETE }}{% endif %}</td></tr>{% endfor %}
+  </table></div>
+  <p class="text-muted small">Le fournisseur recommandé est facultatif : il apparaît sur la demande d'achat. 4 lignes vides sont proposées à chaque ouverture.</p>
+  <button class="btn btn-brand">Enregistrer</button>
+  <a class="btn btn-outline-secondary" href="{% if demande %}{{ demande.get_absolute_url }}{% else %}{% url 'pointage:demande_list' ch.pk %}{% endif %}">Annuler</a>
+</form>
+{% endblock %}

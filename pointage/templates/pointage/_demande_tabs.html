@@ -1,0 +1,15 @@
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 no-print">
+  <div class="btn-group">
+    <a class="btn btn-sm {% if achat %}btn-outline-brand{% else %}btn-brand{% endif %}" href="{% url 'pointage:demande_detail' d.pk %}">Demande d'approvisionnement</a>
+    <a class="btn btn-sm {% if achat %}btn-brand{% else %}btn-outline-brand{% endif %}" href="{% url 'pointage:demande_achat' d.pk %}">Demande d'achat</a>
+  </div>
+  <div class="d-flex gap-2 align-items-center">
+    <span class="pill {% if d.etat == 'Commandée' %}pill-ok{% else %}pill-warn{% endif %}">{{ d.etat }}</span>
+    <a class="btn btn-success btn-sm" href="{% url 'pointage:bon_depuis_demande' d.pk %}">Créer un bon de commande</a>
+    <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">🖨 Imprimer</button>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'pointage:demande_update' d.pk %}">Modifier</a>
+    <a class="btn btn-outline-danger btn-sm" href="{% url 'pointage:demande_delete' d.pk %}">Supprimer</a>
+  </div>
+</div>
+{% if d.bons.all %}<div class="mb-3 no-print small">Bons de commande liés :
+  {% for b in d.bons.all %}<a href="{{ b.get_absolute_url }}" class="pill pill-ok text-decoration-none">{{ b.numero }} · {{ b.fournisseur }}</a> {% endfor %}</div>{% endif %}

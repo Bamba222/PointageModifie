@@ -1,0 +1,21 @@
+#créer le dossier du projet
+mkdir TP_ACSI_2026
+cd TP_ACSI_2026
+
+#Créer l'environnement virtuel (Isoler le projet)
+# Création
+python3 -m venv env
+
+# Activation (Windows)
+.\env\Scripts\activate
+
+# Activation (Mac/Linux)
+source env/bin/activate
+
+#Installer les dépendances
+pip3 install django mysqlclient
+
+#Configuration de la Base de Données
+CREATE DATABASE db_chantier_ept CHARACTER SET utf8mb4;
+
+Dans le fichier settings.py de votre projet Django, modifiez la section DATABASES avec vos identifiants MySQL.

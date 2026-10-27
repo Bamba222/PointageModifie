@@ -1,0 +1,14 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h5 fw-bold mb-0">Équipe du chantier</h2>
+  <div class="d-flex gap-2"><a class="btn btn-outline-secondary btn-sm" href="{% url 'pointage:poste_list' %}">Gérer les postes</a>
+    <a class="btn btn-brand btn-sm" href="{% url 'pointage:ouvrier_create' ch.pk %}">+ Nouvel ouvrier</a></div>
+</div>
+{% for poste, ouvriers in groupes %}
+<div class="card-soft mb-3"><div class="px-3 pt-2 fw-bold">{{ poste|default:"Sans poste" }} <span class="text-muted small">({{ ouvriers|length }})</span></div>
+  <table class="table table-sm grid mb-0"><thead><tr><th>Nom</th><th>Téléphone</th><th>Actif</th><th></th></tr></thead>
+  {% for o in ouvriers %}<tr><td>{{ o.nom }}</td><td>{{ o.telephone }}</td><td>{% if o.actif %}<span class="pill pill-ok">oui</span>{% else %}<span class="pill pill-grey">non</span>{% endif %}</td>
+    <td class="text-center"><a href="{% url 'pointage:ouvrier_update' o.pk %}">✎</a></td></tr>{% endfor %}</table></div>
+{% empty %}<div class="alert alert-info">Aucun ouvrier. Crée d'abord les <a href="{% url 'pointage:poste_list' %}">postes</a> (HSE, grutier, soudeur, ferrailleurs…), puis ajoute les ouvriers.</div>{% endfor %}
+{% endblock %}

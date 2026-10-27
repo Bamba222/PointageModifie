@@ -1,0 +1,52 @@
+{% extends "pointage/base.html" %}
+{% load pointage_tags %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 no-print">
+  <div class="d-flex gap-2 align-items-center">
+    <span class="pill {% if b.livraison == 'complete' %}pill-ok{% elif b.livraison == 'partielle' %}pill-warn{% else %}pill-grey{% endif %}">{{ b.livraison_label }}</span>
+    {% if b.demande %}<a class="small" href="{{ b.demande.get_absolute_url }}">Demande {{ b.demande.numero }}</a>{% endif %}
+  </div>
+  <div class="d-flex gap-2">
+    {% if b.statut != "ANNULE" %}<a class="btn btn-success btn-sm" href="{% url 'pointage:livraison' b.pk %}">Enregistrer une livraison</a>{% endif %}
+    <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">🖨 Imprimer</button>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'pointage:bon_update' b.pk %}">Modifier</a>
+    <a class="btn btn-outline-danger btn-sm" href="{% url 'pointage:bon_delete' b.pk %}">Supprimer</a>
+  </div>
+</div>
+{% doc 'bon' as meta %}
+<div class="paper">
+  {% include "pointage/_doc_head.html" %}
+  <table class="doc-info">
+    <tr><td class="lib">Bon de commande N°</td><td><strong>{{ b.numero }}</strong></td><td class="lib">Date</td><td>{{ b.date|date:"d/m/Y" }}</td></tr>
+    <tr><td class="lib">Fournisseur</td><td colspan="3"><strong>{{ b.fournisseur.nom }}</strong></td></tr>
+    <tr><td class="lib">Adresse</td><td>{{ b.fournisseur.adresse }}</td><td class="lib">Tél</td><td>{{ b.fournisseur.telephone }}</td></tr>
+    <tr><td class="lib">Email</td><td colspan="3">{{ b.fournisseur.email }}</td></tr>
+    <tr><td class="lib">Chantier / Site</td><td colspan="3">{{ b.chantier.nom }}{% if b.chantier.site %} · {{ b.chantier.site }}{% endif %}{% if b.date_livraison_prevue %} — livraison prévue le {{ b.date_livraison_prevue|date:"d/m/Y" }}{% endif %}</td></tr>
+  </table>
+  <table class="doc-table">
+    <thead><tr><th style="width:50px">N°</th><th>Désignation</th><th style="width:100px">Quantité</th><th style="width:90px">Unité</th>
+      <th style="width:150px">Prix Unitaire (F CFA)</th><th style="width:160px">Prix Total (F CFA)</th></tr></thead>
+    {% for l in b.lignes.all %}<tr><td class="text-center">{{ forloop.counter }}</td><td>{{ l.designation }}</td>
+      <td class="text-center">{{ l.quantite|floatformat:"-3" }}</td><td class="text-center">{{ l.unite }}</td>
+      <td class="text-end">{{ l.prix_unitaire|floatformat:"0g" }}</td><td class="text-end">{{ l.prix_total|floatformat:"0g" }}</td></tr>{% endfor %}
+    <tr><td colspan="5" class="text-end fw-bold">TOTAL (F CFA)</td><td class="text-end fw-bold">{{ b.total|floatformat:"0g" }}</td></tr>
+  </table>
+  {% if b.notes %}<p class="mt-3"><strong>Notes :</strong> {{ b.notes }}</p>{% endif %}
+</div>
+<div class="no-print">
+  <h3 class="h6 fw-bold">Livraisons reçues</h3>
+  <div class="card-soft p-2" style="max-width:900px"><table class="table table-sm grid mb-0">
+    <thead><tr><th>Date</th><th>Bon de livraison</th><th>Contenu</th><th></th></tr></thead>
+    {% for r in b.receptions.all %}<tr><td>{{ r.date|date:"d/m/Y" }}</td><td>{{ r.bon_livraison|default:"—" }}</td>
+      <td>{% for lr in r.lignes.all %}{{ lr.ligne_bc.designation }} : {{ lr.quantite|floatformat:"-3" }}{% if not forloop.last %} · {% endif %}{% endfor %}{% if r.notes %}<br><span class="text-muted">{{ r.notes }}</span>{% endif %}</td>
+      <td><form method="post" action="{% url 'pointage:livraison_delete' r.pk %}" onsubmit="return confirm('Supprimer cette livraison ?')">{% csrf_token %}<button class="btn btn-link btn-sm text-danger p-0">✕</button></form></td></tr>
+    {% empty %}<tr><td colspan="4" class="text-muted">Aucune livraison enregistrée.</td></tr>{% endfor %}
+  </table></div>
+  <h3 class="h6 fw-bold mt-4">Reste à recevoir</h3>
+  <div class="card-soft p-2" style="max-width:900px"><table class="table table-sm grid mb-0">
+    <thead><tr><th>Désignation</th><th class="num">Commandé</th><th class="num">Reçu</th><th class="num">Reste</th></tr></thead>
+    {% for l in b.lignes.all %}<tr><td>{{ l.designation }}</td><td class="num">{{ l.quantite|floatformat:"-3" }} {{ l.unite }}</td>
+      <td class="num">{{ l.recu|floatformat:"-3" }}</td><td class="num {% if l.reste %}text-danger fw-bold{% endif %}">{{ l.reste|floatformat:"-3" }}</td></tr>{% endfor %}
+  </table></div>
+</div>
+{% endblock %}

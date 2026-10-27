@@ -1,0 +1,40 @@
+{% load static pointage_tags %}<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connexion · {% entreprise %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static 'pointage/pointage.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="auth">
+  <section class="auth-side">
+    <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f9e44" stroke-width="2.4"><path d="M3 21V9l6-4v16M9 21V12l6-3v12M15 21h6V8l-6 1"/></svg></span>{% entreprise %}</div>
+    <div>
+      <h1>Le chantier, <br>sous contrôle.</h1>
+      <p class="mt-3 mb-4 opacity-75" style="max-width:440px">Pointage des équipes, demandes d'approvisionnement et bons de commande : tout au même endroit, sur les fiches de l'entreprise.</p>
+      <div class="feats">
+        <div class="feat"><span class="dot">✓</span><div><strong>Fiche de pointage</strong><br><span class="small opacity-75">Présences et heures supplémentaires de la semaine</span></div></div>
+        <div class="feat"><span class="dot">✓</span><div><strong>Demande d'approvisionnement</strong><br><span class="small opacity-75">De la demande d'achat jusqu'au bon de commande</span></div></div>
+        <div class="feat"><span class="dot">✓</span><div><strong>Suivi des livraisons</strong><br><span class="small opacity-75">Ce qui est arrivé, ce qu'il reste à recevoir</span></div></div>
+      </div>
+    </div>
+    <div class="small opacity-50">© {% now "Y" %} {% entreprise %}</div>
+  </section>
+  <section class="auth-form">
+    <form method="post" class="box">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <h2 class="h3 fw-bold mb-1">Connexion</h2>
+      <p class="text-muted mb-4">Identifie-toi pour accéder à ton chantier.</p>
+      {% if form.errors %}<div class="alert alert-danger py-2">Nom d'utilisateur ou mot de passe incorrect.</div>{% endif %}
+      <label class="form-label fw-semibold" for="id_username">Nom d'utilisateur</label>
+      <input type="text" name="username" id="id_username" class="form-control mb-3" autofocus autocomplete="username" required value="{{ form.username.value|default:'' }}">
+      <label class="form-label fw-semibold" for="id_password">Mot de passe</label>
+      <input type="password" name="password" id="id_password" class="form-control mb-4" autocomplete="current-password" required>
+      <button class="btn btn-brand w-100 py-2">Se connecter</button>
+    </form>
+  </section>
+</div>
+</body>
+</html>

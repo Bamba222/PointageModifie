@@ -1,0 +1,27 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="card-soft stat"><div class="k">Présents aujourd'hui</div><div class="v">{{ presents_jour }} <small>/ {{ equipe }}</small></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card-soft stat"><div class="k">Heures sup. (semaine)</div><div class="v">{{ hs_semaine|floatformat:"-1" }} <small>h</small></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card-soft stat"><div class="k">Demandes en cours</div><div class="v">{{ demandes|length }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="card-soft stat"><div class="k">Bons à livrer</div><div class="v">{{ a_livrer|length }}</div></div></div>
+</div>
+<div class="d-flex gap-2 flex-wrap mb-4">
+  <a class="btn btn-brand" href="{% url 'pointage:pointage_semaine' ch.pk %}">Fiche de pointage ({{ debut|date:"d/m" }} → {{ fin|date:"d/m" }})</a>
+  <a class="btn btn-outline-brand" href="{% url 'pointage:demande_create' ch.pk %}">+ Demande d'approvisionnement</a>
+  <a class="btn btn-outline-brand" href="{% url 'pointage:bon_create' ch.pk %}">+ Bon de commande</a>
+  <a class="btn btn-outline-secondary ms-auto" href="{% url 'pointage:chantier_update' ch.pk %}">Modifier le chantier</a>
+</div>
+<div class="row g-4">
+  <div class="col-lg-6"><div class="card-soft p-3"><h2 class="h6 fw-bold">Demandes d'approvisionnement en cours</h2>
+    <table class="table table-sm grid mb-0"><thead><tr><th>N°</th><th>Date</th><th>Demandeur</th><th>État</th></tr></thead>
+    {% for d in demandes %}<tr><td><a href="{{ d.get_absolute_url }}">{{ d.numero }}</a>{% if d.urgence %} <span class="pill pill-danger">URGENT</span>{% endif %}</td>
+      <td>{{ d.date|date:"d/m/Y" }}</td><td>{{ d.demandeur }}</td><td>{{ d.etat }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-muted">Aucune demande en cours.</td></tr>{% endfor %}</table></div></div>
+  <div class="col-lg-6"><div class="card-soft p-3"><h2 class="h6 fw-bold">Bons de commande à livrer</h2>
+    <table class="table table-sm grid mb-0"><thead><tr><th>N°</th><th>Fournisseur</th><th>Prévue</th><th>État</th></tr></thead>
+    {% for b in a_livrer %}<tr><td><a href="{{ b.get_absolute_url }}">{{ b.numero }}</a></td><td>{{ b.fournisseur }}</td>
+      <td>{{ b.date_livraison_prevue|date:"d/m/Y"|default:"—" }}</td><td>{{ b.livraison_label }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-muted">Rien en attente de livraison.</td></tr>{% endfor %}</table></div></div>
+</div>
+{% endblock %}

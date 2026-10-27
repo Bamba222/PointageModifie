@@ -1,0 +1,22 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<h2 class="h5 fw-bold mb-1">Créer un bon de commande</h2>
+<p class="text-muted">À partir de la demande <strong>{{ d.numero }}</strong>. Choisis le fournisseur, coche les lignes à commander et saisis les prix unitaires.</p>
+<form method="post">
+  {% csrf_token %}{{ form.non_field_errors }}
+  <div class="card-soft p-3 mb-3"><div class="row g-3" style="max-width:640px">
+    <div class="col-md-8"><label class="form-label small fw-semibold mb-1">Fournisseur</label>{{ form.fournisseur }}
+      {% for e in form.fournisseur.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      <div class="form-text">Pas encore dans la liste ? <a href="{% url 'pointage:fournisseur_create' %}" target="_blank">Ajouter un fournisseur</a></div></div>
+    <div class="col-md-4"><label class="form-label small fw-semibold mb-1">Date</label>{{ form.date }}</div>
+  </div></div>
+  <div class="card-soft p-2 mb-3"><table class="table table-sm grid mb-0">
+    <thead><tr><th style="width:60px">Inclure</th><th>Désignation</th><th class="num">Quantité</th><th>Unité</th><th>Fournisseur recommandé</th><th style="width:170px">Prix unitaire (F CFA)</th></tr></thead>
+    {% for l, inc, prix in form.cellules %}<tr><td class="text-center">{{ inc }}</td><td>{{ l.designation }}</td>
+      <td class="num">{{ l.quantite|floatformat:"-3" }}</td><td>{{ l.unite }}</td><td>{{ l.fournisseur_recommande|default_if_none:"—" }}</td>
+      <td>{{ prix }}{% for e in prix.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td></tr>{% endfor %}
+  </table></div>
+  <button class="btn btn-success">Créer le bon de commande</button>
+  <a class="btn btn-outline-secondary" href="{{ d.get_absolute_url }}">Annuler</a>
+</form>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<div class="card-soft p-4" style="max-width:560px">
+  <h1 class="h5 fw-bold">Supprimer « {{ object }} » ?</h1>
+  <p class="text-muted">Les données rattachées seront supprimées. Action irréversible.</p>
+  <form method="post">{% csrf_token %}<button class="btn btn-danger">Supprimer</button>
+    <a class="btn btn-outline-secondary" href="javascript:history.back()">Annuler</a></form>
+</div>
+{% endblock %}

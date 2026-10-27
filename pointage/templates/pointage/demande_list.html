@@ -1,0 +1,14 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h5 fw-bold mb-0">Demandes d'approvisionnement</h2>
+  <a class="btn btn-brand btn-sm" href="{% url 'pointage:demande_create' ch.pk %}">+ Nouvelle demande</a>
+</div>
+<div class="card-soft p-2"><table class="table table-sm grid mb-0">
+  <thead><tr><th>N°</th><th>Date</th><th>Demandeur</th><th>Fonction</th><th>Lignes</th><th>État</th></tr></thead>
+  {% for d in demandes %}<tr><td><a href="{{ d.get_absolute_url }}"><strong>{{ d.numero }}</strong></a>{% if d.urgence %} <span class="pill pill-danger">URGENT</span>{% endif %}</td>
+    <td>{{ d.date|date:"d/m/Y" }}</td><td>{{ d.demandeur }}</td><td>{{ d.fonction }}</td><td>{{ d.lignes.all|length }}</td>
+    <td>{% if d.etat == "Commandée" %}<span class="pill pill-ok">{{ d.etat }}</span>{% elif d.etat == "Annulée" %}<span class="pill pill-grey">{{ d.etat }}</span>{% else %}<span class="pill pill-warn">{{ d.etat }}</span>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="text-muted">Aucune demande.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

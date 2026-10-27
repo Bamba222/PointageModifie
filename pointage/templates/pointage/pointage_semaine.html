@@ -1,0 +1,95 @@
+{% extends "pointage/base.html" %}
+{% load pointage_tags %}
+{% block content %}
+{% doc 'pointage' as meta %}
+<div class="d-flex align-items-center gap-2 mb-3 flex-wrap no-print">
+  <a class="btn btn-outline-secondary btn-sm" href="?debut={{ precedente|date:'Y-m-d' }}">← Semaine précédente</a>
+  <a class="btn btn-outline-secondary btn-sm" href="?debut={{ suivante|date:'Y-m-d' }}">Semaine suivante →</a>
+  <form method="get" class="d-flex gap-1 ms-2"><input type="date" name="debut" value="{{ debut|date:'Y-m-d' }}" class="form-control form-control-sm">
+    <button class="btn btn-outline-brand btn-sm">Aller</button></form>
+  <button type="button" class="btn btn-outline-secondary btn-sm ms-auto" onclick="window.print()">🖨 Imprimer la fiche</button>
+</div>
+
+{% if not groupes %}
+<div class="alert alert-info">Aucun ouvrier dans l'équipe. <a href="{% url 'pointage:ouvrier_create' ch.pk %}">Ajoute des ouvriers</a> pour commencer le pointage.</div>
+{% else %}
+<form method="post" id="fiche-form">
+  {% csrf_token %}<input type="hidden" name="debut" value="{{ debut|date:'Y-m-d' }}">
+  <div class="fiche">
+    {% include "pointage/_doc_head.html" %}
+    <div class="d-flex justify-content-between fw-bold mb-1"><span>CHANTIER : {{ ch.nom|upper }}</span>
+      <span>SEMAINE DU {{ debut|date:"d F"|upper }} AU {{ fin|date:"d F Y"|upper }}</span></div>
+    <table>
+      <thead>
+        <tr><th class="th-jour" rowspan="2">NOM ET PRÉNOM</th>
+          <th class="th-jour" colspan="8">PRÉSENCE</th><th class="th-hs" colspan="7">HEURES SUPPLÉMENTAIRES</th>
+          <th class="th-total" rowspan="2">TOTAL H. SUP.</th><th class="th-total" rowspan="2">JOURS</th></tr>
+        <tr>{% for e in entetes %}<th class="th-jour">{{ e.nom }}<br><span class="fw-normal">{{ e.d|date:"d/m" }}</span>
+            <br><button type="button" class="btn btn-link p-0 small no-print tous" data-iso="{{ e.d|date:'Y-m-d' }}" style="font-size:.7rem">✓ tous</button></th>{% endfor %}
+          {% for e in entetes|slice:":7" %}<th class="th-hs">{{ e.nom }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+      {% for g in groupes %}
+        <tr class="poste {% cycle 'p1' 'p2' 'p3' %}"><td colspan="18">{{ g.poste|default:"SANS POSTE"|upper }}</td></tr>
+        {% for l in g.lignes %}
+        <tr data-row>
+          <td class="nom">{{ l.o.nom }}</td>
+          {% for c in l.cellules %}<td><input type="hidden" name="s_{{ l.o.pk }}_{{ c.iso }}" value="{{ c.statut }}">{% if forloop.last %}<input type="hidden" name="h_{{ l.o.pk }}_{{ c.iso }}" value="{{ c.hs }}">{% endif %}
+            <button type="button" class="cell-toggle {{ c.statut }}">{% if c.statut == "P" %}Présent{% elif c.statut == "A" %}X{% endif %}</button></td>{% endfor %}
+          {% for c in l.cellules|slice:":7" %}<td><input type="number" class="hs" step="0.5" min="0" max="24" name="h_{{ l.o.pk }}_{{ c.iso }}" value="{{ c.hs }}"></td>{% endfor %}
+          <td class="total-cell" data-total>{{ l.total_hs }}</td><td class="total-cell" data-jours>{{ l.jours }}</td>
+        </tr>
+        {% endfor %}
+      {% endfor %}
+        <tr class="eff"><td class="nom">Effectif présent</td>
+          {% for n in effectif %}<td data-eff>{{ n }}</td>{% endfor %}
+          <td colspan="7"></td><td id="eff-hs">{{ total_hs|floatformat:"-1" }}</td><td></td></tr>
+      </tbody>
+    </table>
+    <div class="doc-sign"><span></span><span>Le chef de projet<br><u>{{ ch.chef_projet|upper|default:"……………………" }}</u></span></div>
+  </div>
+  <div class="save-bar no-print">
+    <button class="btn btn-brand px-4">Enregistrer la fiche</button>
+    <span class="text-muted small">Clique sur une case pour passer de vide → Présent → X. Les heures sup. exigent « Présent ».</span>
+  </div>
+</form>
+<script>
+  const ORDRE = ['', 'P', 'A'], LABEL = {'': '', 'P': 'Présent', 'A': 'X'};
+  const ISOS = [...document.querySelectorAll('.tous')].map(b => b.dataset.iso);
+  function refresh() {
+    document.querySelectorAll('tr[data-row]').forEach(tr => {
+      let tot = 0, jours = 0;
+      tr.querySelectorAll('input.hs').forEach(i => tot += parseFloat(i.value) || 0);
+      tr.querySelectorAll('input[type=hidden][name^="s_"]').forEach(i => { if (i.value === 'P') jours++; });
+      tr.querySelector('[data-total]').textContent = String(Math.round(tot * 10) / 10);
+      tr.querySelector('[data-jours]').textContent = jours;
+    });
+    document.querySelectorAll('td[data-eff]').forEach((td, k) => {
+      td.textContent = document.querySelectorAll('input[type=hidden][name^="s_"][name$="_' + ISOS[k] + '"][value="P"]').length;
+    });
+    let hs = 0; document.querySelectorAll('input.hs').forEach(i => hs += parseFloat(i.value) || 0);
+    document.getElementById('eff-hs').textContent = String(Math.round(hs * 10) / 10);
+  }
+  function setStatut(btn, v) {
+    const hid = btn.previousElementSibling; hid.value = v;
+    btn.className = 'cell-toggle ' + v; btn.textContent = LABEL[v];
+  }
+  document.querySelectorAll('.cell-toggle').forEach(b => b.addEventListener('click', () => {
+    setStatut(b, ORDRE[(ORDRE.indexOf(b.previousElementSibling.value) + 1) % 3]); refresh();
+  }));
+  document.querySelectorAll('input.hs').forEach(i => i.addEventListener('input', () => {
+    if ((parseFloat(i.value) || 0) > 0) {                       // des heures sup. impliquent une présence
+      const td = i.closest('tr').querySelectorAll('.cell-toggle')[[...i.closest('tr').querySelectorAll('input.hs')].indexOf(i)];
+      if (td && td.previousElementSibling.value !== 'P') setStatut(td, 'P');
+    }
+    refresh();
+  }));
+  document.querySelectorAll('.tous').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('input[type=hidden][name^="s_"][name$="_' + b.dataset.iso + '"]').forEach(h => {
+      if (!h.value) setStatut(h.nextElementSibling, 'P');
+    }); refresh();
+  }));
+  refresh();
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,9 @@
+<table class="doc-head">
+  <tr>
+    <td class="logo" rowspan="{% if meta.code and meta.date_application %}3{% elif meta.code or meta.date_application %}2{% else %}1{% endif %}">{% include "pointage/_logo.html" %}</td>
+    <td class="titre" rowspan="{% if meta.code and meta.date_application %}3{% elif meta.code or meta.date_application %}2{% else %}1{% endif %}">{{ meta.titre }}</td>
+    {% if meta.code %}<td class="meta"><strong>{{ meta.code }}</strong></td></tr><tr>{% endif %}
+    <td class="meta">Version {{ meta.version }}</td>
+  </tr>
+  {% if meta.date_application %}<tr><td class="meta">Date d'application :<br>{{ meta.date_application }}</td></tr>{% endif %}
+</table>

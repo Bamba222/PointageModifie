@@ -1,0 +1,17 @@
+{% extends "pointage/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h5 fw-bold mb-0">Bons de commande</h2>
+  <a class="btn btn-brand btn-sm" href="{% url 'pointage:bon_create' ch.pk %}">+ Nouveau bon de commande</a>
+</div>
+<div class="card-soft p-2"><table class="table table-sm grid mb-0">
+  <thead><tr><th>N°</th><th>Date</th><th>Fournisseur</th><th class="num">Total (F CFA)</th><th>Livraison</th></tr></thead>
+  {% for b in bons %}<tr><td><a href="{{ b.get_absolute_url }}"><strong>{{ b.numero }}</strong></a></td><td>{{ b.date|date:"d/m/Y" }}</td>
+    <td>{{ b.fournisseur }}</td><td class="num">{{ b.total|floatformat:"0g" }}</td>
+    <td>{% if b.statut == "ANNULE" %}<span class="pill pill-grey">Annulé</span>
+      {% elif b.livraison == "complete" %}<span class="pill pill-ok">{{ b.livraison_label }}</span>
+      {% elif b.livraison == "partielle" %}<span class="pill pill-warn">{{ b.livraison_label }}</span>
+      {% else %}<span class="pill pill-grey">{{ b.livraison_label }}</span>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="5" class="text-muted">Aucun bon de commande.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}
