@@ -6,8 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Sur le serveur, la vraie clé et DEBUG=0 sont définis dans le fichier WSGI.
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-tp_parc_secret_key_change_me")
 DEBUG = os.environ.get("DEBUG", "1") == "1"
-ALLOWED_HOSTS = ['bambadiallo.pythonanywhere.com', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://bambadiallo.pythonanywhere.com']
+ALLOWED_HOSTS = ['Bambaleu.pythonanywhere.com', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://Bambaleu.pythonanywhere.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
